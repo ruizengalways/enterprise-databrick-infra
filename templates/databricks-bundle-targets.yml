@@ -1,0 +1,61 @@
+# Copy/adapt these targets into a consuming workload repository.
+# This file is a platform-owned template, not an active bundle by itself.
+variables:
+  catalog:
+    description: Environment catalog managed by platform automation.
+  runtime_service_principal:
+    description: Service-principal application ID used to run shared workloads.
+  operator_group:
+    description: Databricks group allowed to manage shared workload resources.
+  ci_namespace:
+    description: Unique PR/CI deployment namespace.
+    default: manual
+
+targets:
+  dev:
+    mode: development
+    default: true
+    variables:
+      catalog: edp_dev
+    run_as:
+      user_name: ${workspace.current_user.userName}
+
+  ci:
+    mode: development
+    variables:
+      catalog: edp_ci
+    workspace:
+      root_path: /Workspace/Users/${workspace.current_user.userName}/.bundle/${bundle.name}/${bundle.target}/${var.ci_namespace}
+    presets:
+      name_prefix: '[${var.ci_namespace}] '
+      trigger_pause_status: PAUSED
+      jobs_max_concurrent_runs: 1
+    run_as:
+      service_principal_name: ${var.runtime_service_principal}
+
+  shared_dev:
+    mode: production
+    variables:
+      catalog: edp_dev
+    workspace:
+      root_path: /Workspace/Platform/.bundle/${bundle.name}/${bundle.target}
+    run_as:
+      service_principal_name: ${var.runtime_service_principal}
+
+  uat:
+    mode: production
+    variables:
+      catalog: edp_uat
+    workspace:
+      root_path: /Workspace/Platform/.bundle/${bundle.name}/${bundle.target}
+    run_as:
+      service_principal_name: ${var.runtime_service_principal}
+
+  prod:
+    mode: production
+    variables:
+      catalog: edp_prod
+    workspace:
+      root_path: /Workspace/Platform/.bundle/${bundle.name}/${bundle.target}
+    run_as:
+      service_principal_name: ${var.runtime_service_principal}
