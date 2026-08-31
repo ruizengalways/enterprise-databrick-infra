@@ -1,0 +1,29 @@
+schema_version: 1
+kind: repository_contract
+repository: ruizengalways/enterprise-databrick-infra
+role: optional_platform_iac_reference
+purpose: >-
+  Optional reference implementation for Databricks platform provisioning,
+  identities, Unity Catalog/workspace boundaries, and deployment templates.
+human_entrypoint: README.md
+human_context: docs/PROJECT_CONTEXT.md
+machine_entrypoint: project/repository.yml
+implementation_state: project/capabilities.yml
+owns:
+  - terraform_reference_modules
+  - platform_identity_bootstrap_reference
+  - workspace_catalog_binding_reference
+  - platform_environment_reference
+  - workload_deployment_templates
+must_not_own:
+  - reusable_framework_runtime
+  - customer_dataset_metadata
+  - customer_source_fixtures
+  - expected_business_outcomes
+  - certification_verdicts
+  - technology_neutral_pattern_semantics
+optional_for_framework_adoption: true
+related_repositories:
+  - ruizengalways/enterprise-databrick-framework
+  - ruizengalways/enterprise-databrick-customer
+  - ruizengalways/data-engineering-cheetsheet
