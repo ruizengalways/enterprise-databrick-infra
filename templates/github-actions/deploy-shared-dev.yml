@@ -1,0 +1,37 @@
+name: Deploy shared DEV
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  id-token: write
+  contents: read
+
+concurrency:
+  group: databricks-shared-dev
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: dev
+    env:
+      DATABRICKS_AUTH_TYPE: github-oidc
+      DATABRICKS_HOST: ${{ vars.DATABRICKS_HOST }}
+      DATABRICKS_CLIENT_ID: ${{ vars.DATABRICKS_CLIENT_ID }}
+      BUNDLE_VAR_runtime_service_principal: ${{ vars.DATABRICKS_RUNTIME_CLIENT_ID }}
+      BUNDLE_VAR_operator_group: ${{ vars.DATABRICKS_OPERATOR_GROUP }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+      - name: Validate workload
+        run: ./scripts/ci/validate.sh
+      - uses: databricks/setup-cli@main
+      - name: Validate and plan
+        run: |
+          databricks bundle validate -t shared_dev
+          databricks bundle plan -t shared_dev
+      - name: Deploy exact merge SHA
+        run: databricks bundle deploy -t shared_dev
