@@ -1,0 +1,18 @@
+schema_version: 1
+kind: infra_capabilities
+status_basis: released_main_only
+terraform_modules:
+  unity_catalog_environment: implemented
+  workspace_binding: implemented
+  github_oidc_service_principal: implemented
+reference_templates:
+  declarative_automation_bundle_targets: implemented
+  github_actions_workload_deployment: implemented
+validation:
+  terraform_validation_ci: implemented
+runtime_application:
+  applied_to_real_databricks_account: not_certified_here
+rules:
+  terraform_validation_is_not_runtime_certification: true
+  environment_names_are_reference_defaults: true
+  framework_adoption_does_not_require_this_repo: true
