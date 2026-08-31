@@ -1,8 +1,6 @@
 # Project Context — Enterprise Databricks Infra
 
-Last architecture/documentation audit: **2026-08-31**.
-
-Read this file first when resuming platform work in a new conversation.
+This is the **human-readable** platform context. Machine-readable ownership and implementation state live in `project/repository.yml` and `project/capabilities.yml`.
 
 ## Repository role
 
@@ -19,42 +17,50 @@ This repository is an **optional platform/IaC reference implementation**. It is 
 
 A company with an existing Databricks platform must be able to ignore this repo and still use the framework package.
 
-Normal data engineers should not edit Terraform merely to onboard a new dataset. Dataset semantics, source adapters, expected outputs and domain transformations belong in workload/customer repos.
+Normal data engineers should not edit Terraform merely to onboard a new dataset. Dataset semantics, source adapters, expected outputs, and domain transformations belong in workload/customer repos.
 
-## Current platform reference decisions
+## Platform reference decisions
 
-1. Terraform owns long-lived platform/admin resources such as catalog foundations, workspace bindings and automation identities where this reference implementation provisions them.
-2. Workload resource deployment should use Declarative Automation Bundles in the consuming workload repo; this infra repo provides templates, not the workload itself.
-3. Current Bundles use the direct deployment engine; do not make the deprecated Terraform Bundle engine a new dependency.
-4. GitHub automation should use Databricks workload identity federation/OIDC when possible; avoid long-lived PAT/client-secret storage.
-5. Deployment identities and runtime identities are conceptually distinct and should receive least privilege.
-6. Workspace-catalog bindings may be used to isolate production catalogs from non-production workspaces.
-7. Environment/catalog names in this repo are examples/reference defaults, not framework API requirements.
-8. No infrastructure state or environment-specific identifier belongs in `enterprise-databrick-framework`.
+1. Terraform owns long-lived platform/admin resources that this reference implementation provisions.
+2. Workload deployment belongs in the consuming workload repo; this repo may provide templates.
+3. GitHub automation should prefer workload identity federation/OIDC over long-lived PATs or client secrets.
+4. Deployment and runtime identities are distinct security concepts and should be least privilege.
+5. Workspace-catalog bindings may be used to isolate production catalogs from non-production workspaces.
+6. Environment/catalog names in this repo are examples, not framework API requirements.
+7. No infrastructure state or environment-specific identifier belongs in `enterprise-databrick-framework`.
 
-## Current implementation state
+Fast-changing Databricks product details such as Bundle deployment behavior, authentication, provider resource support, serverless/runtime features, and workspace bindings must be checked against current official documentation before material changes.
 
-At this audit point this repo contains:
+## Certification boundary
 
-- `unity_catalog_environment` Terraform module;
-- `workspace_binding` Terraform module;
-- `github_oidc_service_principal` Terraform module;
-- DEV/CI/UAT/PROD example environment configuration;
-- Declarative Automation Bundle target and GitHub Actions templates;
-- Terraform validation CI.
+`enterprise-databrick-customer` owns independent framework certification evidence. This repo may supply a reference environment and deployment template for real Databricks C3-C5 runs, but Terraform validation does not itself certify framework runtime correctness.
 
-The Terraform validation workflow has passed on GitHub Actions. This does **not** mean the modules have been applied to every cloud/account; it proves syntax/provider validation for this reference code.
+## Human vs machine documentation
 
-## How this repo interacts with certification
+```text
+Human narrative
+  README.md
+  docs/**/*.md
 
-`enterprise-databrick-customer` owns independent framework certification evidence. When real Databricks C3-C5 certification is executed, this repo may supply an optional reference environment, identity and deployment template. Certification must still record exact framework/customer SHAs and cannot be inferred from Terraform validation.
+Machine repository/capability state
+  project/**/*.yml
+```
+
+Automation must read `project/capabilities.yml` instead of parsing prose for current implementation state.
 
 ## Resume checklist
 
-Before changing platform behavior:
+For a human:
 
 1. read this file and `docs/OWNERSHIP.md`;
-2. inspect current `main`, open PRs and Terraform CI;
-3. check current Databricks official documentation for features that change quickly (Bundles, authentication, provider/resource support);
-4. do not move customer/workload semantics into Terraform;
-5. update this file if a platform boundary or major reference decision changes.
+2. inspect relevant ADRs/runbooks;
+3. verify current Databricks platform guidance before implementation changes.
+
+For an automated agent/new conversation:
+
+1. read `project/repository.yml` and `project/capabilities.yml`;
+2. read the customer repo's `project/context.yml` and `project/state.yml`;
+3. inspect current `main`, open PRs, and CI;
+4. do not move workload semantics into Terraform.
+
+Current SHAs and dynamic certification status are intentionally not duplicated in this Markdown.
